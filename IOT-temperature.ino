@@ -1,4 +1,5 @@
 #include <WiFi.h>
+#include <WiFiManager.h>
 #include "DHT.h"
 #include <LiquidCrystal_I2C.h> 
 #include <HTTPClient.h>
@@ -24,6 +25,15 @@ void UploadData(int h,int t){
 
   int httpCode = http.GET();
   if(httpCode != HTTP_CODE_OK)Serial.println("網路上傳失敗"); 
+}
+
+void LCD_W(float h,float t){ 
+  lcd.setCursor(0,0); //(col/row)
+  lcd.print("Humidity:" + String(h)+" ");
+  lcd.setCursor(0,1);
+  lcd.print("Temperature:"+ String(t)); 
+  lcd.setCursor(15,0); 
+  lcd.write(byte(0)); //smile
 }
 
 void setup(){
@@ -58,17 +68,9 @@ void loop(){
   unsigned long currentMillis = millis();
   float h = dht.readHumidity();   //Humidity
   float t = dht.readTemperature(); //Temperature
-
-  
   
   if (WiFi.status() == WL_CONNECTED) { //if wifi connected,smile and update
-    lcd.setCursor(0,0); //(col/row)
-    lcd.print("Humidity:" + String(h)+" ");
-    lcd.setCursor(0,1);
-    lcd.print("Temperature:"+ String(t)); 
-    lcd.setCursor(15,0); 
-    lcd.write(byte(0)); //smile
-    
+    LCD_W(h,t);
     if(millis() > time_now + 15000) {
       time_now = millis();
       UploadData(h,t);
